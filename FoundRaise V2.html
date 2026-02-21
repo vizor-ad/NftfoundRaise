@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اکوسیستم فاندریزینگ NFT</title>
+    
+    <!-- بهبود سرعت: Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* =========================================
+           تنظیمات پایه و متغیرها
+           ========================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif; background: #f8f9fc; color: #2d3436;
+            line-height: 1.8; overflow-x: hidden; position: relative; width: 100%;
+            -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+        }
+
+        :root {
+            --primary: #6c5ce7; --primary-light: #a29bfe; --primary-dark: #5a4bd1;
+            --secondary: #00cec9; --accent: #fd79a8; --bg: #f8f9fc; --bg-card: #ffffff;
+            --bg-dark: #eef0f5; --text: #1e272e; --text-muted: #636e72;
+            --success: #00b894; --warning: #fdcb6e; --danger: #d63031;
+            --border: rgba(0,0,0,0.06); --glass-border: rgba(255, 255, 255, 0.6);
+            --shadow: 0 10px 30px rgba(0,0,0,0.03); --shadow-hover: 0 20px 40px rgba(108, 92, 231, 0.12);
+            --glow: rgba(108, 92, 231, 0.3); --radius-md: 16px; --radius-lg: 24px;
+        }
+
+        /* ===== هدر (گلس مورفیسم) ===== */
+        header {
+            background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000;
+            padding: 0 40px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        header.scrolled { box-shadow: 0 10px 30px rgba(0,0,0,0.05); background: rgba(255, 255, 255, 0.95); }
+        .header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 75px; }
+
+        .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+        .logo-icon { width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; font-weight: 900; box-shadow: 0 8px 20px var(--glow); transition: transform 0.4s; }
+        .logo:hover .logo-icon { transform: rotate(-10deg) scale(1.05); }
+        .logo-text { font-size: 20px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+        .logo-text span { color: var(--primary); }
+
+        nav { display: flex; align-items: center; gap: 8px; }
+        nav a { color: var(--text-muted); text-decoration: none; padding: 10px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; transition: all 0.3s; position: relative; }
+        nav a:not(.nav-cta)::after { content: ''; position: absolute; bottom: 5px; right: 50%; transform: translateX(50%); width: 0; height: 3px; background: var(--primary); border-radius: 4px; transition: width 0.3s ease; }
+        nav a:not(.nav-cta):hover::after, nav a.active::after { width: 20px; }
+        nav a:not(.nav-cta):hover, nav a.active { color: var(--text); background: rgba(108, 92, 231, 0.05); }
+
+        .nav-cta { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white !important; padding: 12px 24px !important; border-radius: var(--radius-md); margin-right: 12px; font-weight: 700 !important; box-shadow: 0 8px 20px var(--glow); transition: all 0.4s !important; }
+        .nav-cta:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 25px var(--glow); }
+
+        .mobile-toggle { display: none; font-size: 24px; color: var(--text); cursor: pointer; background: none; border: none; }
+
+        /* ===== کلاس‌های عمومی ===== */
+        section { padding: 120px 40px; max-width: 1400px; margin: 0 auto; position: relative; }
+        .section-header { text-align: center; margin-bottom: 70px; }
+        .section-tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(108, 92, 231, 0.08); border: 1px solid rgba(108, 92, 231, 0.15); padding: 8px 20px; border-radius: 50px; font-size: 13px; font-weight: 700; color: var(--primary-dark); margin-bottom: 20px; letter-spacing: 0.5px; }
+        .section-header h2 { font-size: 40px; font-weight: 900; color: var(--text); margin-bottom: 16px; letter-spacing: -1px; }
+        .section-header p { font-size: 17px; color: var(--text-muted); max-width: 650px; margin: 0 auto; line-height: 1.8; }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 35px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+        .card:hover { border-color: rgba(108, 92, 231, 0.2); transform: translateY(-8px); box-shadow: var(--shadow-hover); }
+
+        /* =========================================
+           هیرو (Hero) - بهینه‌��ده
+           ========================================= */
+        .hero { 
+            padding: 140px 40px 160px; 
+            text-align: center; 
+            position: relative; 
+            overflow: hidden; 
+            background: linear-gradient(180deg, #f4f2ff 0%, var(--bg) 100%); 
+        }
+        
+        .hero::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background-image: linear-gradient(rgba(108, 92, 231, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(108, 92, 231, 0.07) 1px, transparent 1px);
+            background-size: 40px 40px; z-index: 0; opacity: 0; 
+            transform: perspective(500px) rotateX(60deg) translate3d(0, 0, 0);
+            animation: fadeInGrid 2s ease 0.5s forwards, moveGrid 15s linear infinite;
+            will-change: transform, opacity;
+        }
+
+        @keyframes moveGrid {
+            to { transform: perspective(500px) rotateX(60deg) translate3d(0, 40px, 0); }
+        }
+
+        .hero-orb { position: absolute; border-radius: 50%; filter: blur(90px); z-index: 0; opacity: 0; animation-fill-mode: forwards; will-change: transform, opacity; }
+        .orb-1 { top: -10%; right: -5%; width: 600px; height: 600px; background: rgba(108,92,231,0.3); animation: fadeInOrb 2s ease 0.5s forwards, floatOrb1 12s ease-in-out infinite alternate; }
+        .orb-2 { bottom: -10%; left: -10%; width: 500px; height: 500px; background: rgba(0,206,201,0.25); animation: fadeInOrb 2s ease 0.8s forwards, floatOrb2 15s ease-in-out infinite alternate; }
+        .orb-3 { top: 30%; left: 30%; width: 400px; height: 400px; background: rgba(253,121,168,0.15); animation: fadeInOrb 2s ease 1s forwards, floatOrb3 10s ease-in-out infinite alternate; }
+        
+        @keyframes floatOrb1 { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(-50px, 50px, 0) scale(1.1); } }
+        @keyframes floatOrb2 { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(50px, -50px, 0) scale(1.2); } }
+        @keyframes floatOrb3 { 0% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(30px, 30px, 0) scale(0.9); } }
+        @keyframes fadeInGrid { to { opacity: 1; } }
+        @keyframes fadeInOrb { to { opacity: 1; } }
+
+        .glass-card {
+            position: absolute; background: rgba(255, 255, 255, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px; box-shadow: 0 15px 35px rgba(108, 92, 231, 0.15);
+            z-index: 1; opacity: 0; display: flex; align-items: center; justify-content: center;
+            will-change: transform, opacity;
+        }
+        
+        .gc-1 { top: 15%; right: 10%; width: 140px; height: 180px; animation: fadeInOrb 1.5s forwards 0.8s, floatGlass1 6s infinite alternate ease-in-out; }
+        .gc-2 { bottom: 25%; left: 8%; width: 120px; height: 160px; animation: fadeInOrb 1.5s forwards 1.2s, floatGlass2 7s infinite alternate ease-in-out; }
+        .gc-3 { top: 40%; left: 18%; width: 80px; height: 80px; border-radius: 50%; animation: fadeInOrb 1.5s forwards 1.5s, floatGlass3 5s infinite alternate ease-in-out; }
+
+        @keyframes floatGlass1 { 0% { transform: translate3d(0, 0, 0) rotate(15deg); } 100% { transform: translate3d(0, -30px, 0) rotate(25deg); } }
+        @keyframes floatGlass2 { 0% { transform: translate3d(0, 0, 0) rotate(-20deg); } 100% { transform: translate3d(0, 30px, 0) rotate(-10deg); } }
+        @keyframes floatGlass3 { 0% { transform: translate3d(0, 0, 0) rotate(45deg) scale(1); } 100% { transform: translate3d(0, -20px, 0) rotate(90deg) scale(1.1); } }
+
+        .hero-content { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; }
+        
+        .reveal-element {
+            opacity: 0; transform: translate3d(0, 30px, 0);
+            animation: slideUpReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity;
+        }
+        
+        .hero-badge { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.8); border: 1px solid rgba(108, 92, 231, 0.3); padding: 8px 24px; border-radius: 50px; font-size: 14px; font-weight: 800; color: var(--primary-dark); margin-bottom: 30px; box-shadow: 0 8px 25px rgba(108, 92, 231, 0.1); animation-delay: 0.1s; position: relative; overflow: hidden; }
+        
+        .hero h1 { font-size: 64px; font-weight: 900; line-height: 1.2; margin-bottom: 24px; color: var(--text); letter-spacing: -2px; text-shadow: 0 10px 30px rgba(0,0,0,0.05); animation-delay: 0.3s;}
+        .hero h1 .highlight { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative; display: inline-block; padding-bottom: 5px;
+        }
+        
+        .hero p { font-size: 20px; color: var(--text-muted); max-width: 750px; margin: 0 auto 45px; line-height: 1.8; animation-delay: 0.5s; font-weight: 500;}
+
+        .hero-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; animation-delay: 0.7s; }
+        .btn-primary, .btn-secondary { padding: 18px 40px; border-radius: var(--radius-md); text-decoration: none; font-weight: 800; font-size: 16px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); display: inline-flex; align-items: center; gap: 10px; cursor: pointer; position: relative; overflow: hidden; }
+        
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.4); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-primary:hover { transform: translate3d(0, -5px, 0) scale(1.02); box-shadow: 0 20px 40px rgba(108, 92, 231, 0.6); }
+        
+        .btn-secondary { background: white; color: var(--text); border: 1px solid rgba(108, 92, 231, 0.2); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+        .btn-secondary:hover { border-color: var(--primary); transform: translate3d(0, -5px, 0); box-shadow: 0 15px 35px rgba(108, 92, 231, 0.15); }
+
+        @keyframes slideUpReveal {
+            to { transform: translate3d(0, 0, 0); opacity: 1; }
+        }
+
+        /* ===== آمار لایو ===== */
+        .live-stats { padding: 0 40px; margin-top: -80px; position: relative; z-index: 10; }
+        .live-stats-inner { max-width: 1200px; margin: 0 auto; background: rgba(255, 255, 255, 0.95); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 40px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+        .live-stat { text-align: center; position: relative; }
+        .live-stat:not(:last-child)::after { content: ''; position: absolute; left: 0; top: 15%; height: 70%; width: 1px; background: linear-gradient(to bottom, transparent, var(--border), transparent); }
+        .live-stat .live-dot { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--success); margin-bottom: 12px; background: rgba(0, 184, 148, 0.1); padding: 6px 14px; border-radius: 20px; }
+        .live-stat .value { font-size: 38px; font-weight: 900; color: var(--text); display: block; letter-spacing: -1px; }
+        .live-stat .value span.unit { font-size: 16px; color: var(--primary); margin-right: 4px; }
+        .live-stat .label { font-size: 15px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+        /* ===== نحوه کار و مدل ارزش ===== */
+        .how-it-works { display: grid; grid-template-columns: repeat(5, 1fr); gap: 24px; }
+        .step-card { text-align: center; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .step-number { width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 20px; color: white; margin: 0 auto 24px; box-shadow: 0 8px 20px var(--glow); border: 2px solid white; z-index: 2; }
+        .step-card .step-icon { font-size: 42px; margin-bottom: 20px; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: transform 0.3s; }
+        .step-card h3 { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 12px; }
+        .step-card p { font-size: 14px; color: var(--text-muted); line-height: 1.8; }
+
+        .value-model-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 40px; align-items: center; margin-top: 80px; }
+        
+        /* باکس استایل‌دار متن */
+        .value-text-box {
+            background: white; border-radius: var(--radius-lg); padding: 50px 40px;
+            border: 1px solid var(--border); box-shadow: var(--shadow); position: relative;
+        }
+        /* ��ط متصل‌کننده نقطه‌چین بین باکس متن و مثال */
+        .value-text-box::after {
+            content: ''; position: absolute; top: 50%; left: -40px; width: 40px; height: 0;
+            border-top: 3px dashed var(--primary-light); z-index: 0; opacity: 0.8;
+        }
+        .value-text-box::before {
+            content: '\f053'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; top: 50%; left: -48px; transform: translateY(-50%);
+            color: var(--primary); font-size: 18px; z-index: 1;
+        }
+
+        .value-text-box h3 { font-size: 30px; font-weight: 900; color: var(--text); margin-bottom: 24px; letter-spacing: -1px; }
+        .value-text-box p { font-size: 16px; color: var(--text-muted); margin-bottom: 20px; text-align: justify; line-height: 1.9;}
+        
+        /* باکس مثال */
+        .value-example { background: #ffffff; border-radius: var(--radius-lg); padding: 50px; border: 2px solid rgba(108, 92, 231, 0.15); box-shadow: 0 25px 50px rgba(108, 92, 231, 0.08); position: relative; }
+        
+        .value-timeline { position: relative; }
+        .value-point { display: flex; align-items: center; gap: 24px; padding: 25px 0; position: relative; }
+        
+        /* خط گرادیا��ت بین مراحل در تایم‌لاین */
+        .value-point:not(:last-child)::before {
+            content: ''; position: absolute; right: 28px; top: 55px; bottom: -20px;
+            width: 4px; border-radius: 4px; z-index: 1;
+        }
+        .value-point:nth-child(1)::before { background: linear-gradient(to bottom, var(--primary-light), var(--secondary)); }
+        .value-point:nth-child(2)::before { background: linear-gradient(to bottom, rgba(0,206,201,0.5), rgba(0,184,148,0.5)); }
+
+        /* سر فلش رنگی انتهای خط */
+        .value-point:not(:last-child)::after {
+            content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900;
+            position: absolute; right: 23px; bottom: -28px; font-size: 14px; z-index: 2;
+            background: white; padding: 2px 0;
+        }
+        .value-point:nth-child(1)::after { color: var(--secondary); }
+        .value-point:nth-child(2)::after { color: var(--success); }
+
+        .value-dot { width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; position: relative; z-index: 3; box-shadow: 0 10px 20px rgba(0,0,0,0.05); background: white; }
+        .value-dot.buy { color: var(--primary); border: 2px solid var(--primary-light); }
+        .value-dot.grow { color: var(--secondary); border: 2px solid rgba(0,206,201,0.5); }
+        .value-dot.sell { color: var(--success); border: 2px solid rgba(0,184,148,0.5); }
+        .value-info .value-label { font-size: 15px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+        .value-info .value-amount { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; }
+        .value-info .value-amount.original { color: var(--primary); }
+        .value-info .value-amount.grown { color: var(--secondary); }
+        .value-info .value-amount.profit { color: var(--success); }
+
+        /* ===== درباره ما ===== */
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+        .about-text h3 { font-size: 32px; font-weight: 900; margin-bottom: 24px; letter-spacing: -1px; }
+        .about-text p { font-size: 17px; color: var(--text-muted); line-height: 1.9; margin-bottom: 16px; }
+        .about-features { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+        .about-feature { background: white; border-radius: var(--radius-md); padding: 24px; border: 1px solid var(--border); transition: transform 0.3s; }
+        .about-feature .icon { font-size: 28px; margin-bottom: 16px; color: var(--primary); }
+        
+        .legal-info h3 { font-size: 22px; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+        .legal-info p { font-size: 15px; line-height: 1.8; color: var(--text-muted); margin-bottom: 20px;}
+        .legal-row { display: flex; justify-content: space-between; padding: 18px 0; border-bottom: 1px dashed var(--border); font-size: 15px; }
+        .legal-row:last-child { border-bottom: none; }
+        .legal-row .label { color: var(--text-muted); font-weight: 500;}
+        .legal-row .value { color: var(--text); font-weight: 800; }
+
+        /* ===== تیم ===== */
+        .team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        .team-card { text-align: center; padding: 40px 24px; }
+        .team-avatar { width: 90px; height: 90px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; color: white; margin: 0 auto 20px; font-weight: 900; box-shadow: 0 10px 20px var(--glow); border: 3px solid white; }
+        .team-card h4 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+        .team-card .role { font-size: 14px; color: var(--primary); margin-bottom: 12px; font-weight: 700; }
+        .team-card .bio { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+        .team-social { display: flex; gap: 10px; justify-content: center; }
+        .team-social a { width: 36px; height: 36px; background: var(--bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-decoration: none; font-size: 18px; border: 1px solid var(--border); transition: all 0.3s; }
+        .team-social a:hover { color: var(--primary); border-color: var(--primary); }
+
+        /* ===== داشبورد شفاف��ت ===== */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+        .dashboard-header h3 { font-size: 24px; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+        .chain-badge { background: rgba(0, 206, 201, 0.1); color: var(--secondary); padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 700; }
+        .wallet-addresses { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+        .wallet-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; }
+        .wallet-card .label { font-weight: 600; color: var(--text); }
+        .wallet-card .address { font-family: monospace; font-size: 15px; color: var(--primary-dark); word-break: break-all; margin: 12px 0; font-weight: 600; background: white; padding: 12px; border-radius: 8px; border: 1px dashed var(--border); }
+        .allocation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+        .allocation-chart h4 { font-size: 20px; font-weight: 800; margin-bottom: 30px; }
+        .bar-item { margin-bottom: 24px; }
+        .bar-item .bar-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px; }
+        .bar-item .bar-label { font-weight: 700; color: var(--text); }
+        .bar-item .bar-value { font-weight: 800; color: var(--text-muted); }
+        .bar-item .bar-bg { height: 12px; background: var(--bg-dark); border-radius: 6px; overflow: hidden; }
+        .bar-item .bar-fill { height: 100%; border-radius: 6px; width: 0; transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .bar-fill.purple { background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+        .bar-fill.teal { background: linear-gradient(90deg, var(--secondary), #55efc4); }
+        .bar-fill.pink { background: linear-gradient(90deg, var(--accent), #fab1a0); }
+        .bar-fill.green { background: linear-gradient(90deg, var(--success), #55efc4); }
+
+        /* ===== پورتفولیو ===== */
+        .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .portfolio-image { height: 220px; display: flex; align-items: center; justify-content: center; font-size: 60px; position: relative; color: rgba(0,0,0,0.4); }
+        .portfolio-status { position: absolute; top: 20px; right: 20px; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 800; background: white; z-index: 10;}
+        .status-active { color: var(--success); }
+        .portfolio-content { padding: 30px; background: white; position: relative; z-index: 5; }
+        .portfolio-content h3 { font-size: 20px; font-weight: 800; margin: 8px 0 12px; letter-spacing: -0.5px; }
+        .portfolio-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-top: 24px; border-top: 1px solid var(--border); margin-top: 24px; }
+        .meta-item .meta-label { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+        .meta-item .meta-value { font-size: 16px; font-weight: 900; }
+        .doc-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; font-weight: 700; color: var(--text); text-decoration: none; }
+
+        /* ===== اپلیکیشن ===== */
+        .app-section { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); border-radius: var(--radius-lg); padding: 80px 40px; text-align: center; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px var(--glow); }
+        .app-section::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none;}
+        .app-section * { color: white; position: relative; z-index: 2;}
+        .app-badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); padding: 14px 28px; border-radius: 14px; display: inline-flex; align-items: center; gap: 14px; text-decoration: none; transition: all 0.3s; font-weight: 700;}
+
+        /* ===== حاکمیت ===== */
+        .governance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .governance-card h3 { font-size: 24px; font-weight: 900; margin-bottom: 30px; display: flex; align-items: center; gap: 12px; }
+        .rights-list { list-style: none; }
+        .rights-list li { padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--text-muted); display: flex; align-items: center; gap: 16px; font-weight: 500;}
+        .rights-list li:last-child { border-bottom: none; }
+        .rights-list li .right-icon { width: 40px; height: 40px; background: rgba(108, 92, 231, 0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--primary); flex-shrink: 0; }
+        .signer { display: flex; align-items: center; gap: 16px; padding: 20px; background: var(--bg); border-radius: 16px; margin-bottom: 16px; border: 1px solid var(--border); }
+        .signer-icon { width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; }
+        .signer-info .signer-name { font-size: 16px; font-weight: 800; color: var(--text); }
+
+        /* ===== اسناد ===== */
+        .documents-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .doc-card .doc-icon { font-size: 38px; margin-bottom: 20px; color: var(--primary); }
+        .doc-card h4 { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+        .doc-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.8; }
+        .doc-download { display: inline-flex; align-items: center; gap: 10px; color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 800; }
+
+        /* ===== ریسک ===== */
+        .risk-section { background: #fff5f3; border: 1px solid rgba(214, 48, 49, 0.2); border-radius: var(--radius-lg); padding: 60px; position: relative; overflow: hidden;}
+        .risk-section::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; font-size: 300px; color: rgba(214, 48, 49, 0.03); top: -50px; left: -50px; z-index: 0; pointer-events: none;}
+        .risk-section > * { position: relative; z-index: 1;}
+        .risk-section h3 { color: var(--danger); font-size: 28px; font-weight: 900; margin-bottom: 40px; display: flex; align-items: center; gap: 12px;}
+        .risk-categories { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .risk-category h4 { font-size: 17px; font-weight: 800; margin-bottom: 20px; }
+        .risk-category ul { list-style: none; }
+        .risk-category li { font-size: 14px; color: var(--text-muted); padding: 10px 0; padding-right: 24px; position: relative; font-weight: 500;}
+        .risk-category li::before { content: '\f071'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 0; top: 13px; font-size: 12px; color: var(--danger); }
+        .risk-disclaimer { background: rgba(214, 48, 49, 0.08); border: 1px dashed rgba(214, 48, 49, 0.4); border-radius: 16px; padding: 30px; margin-top: 40px; text-align: center; }
+        .risk-disclaimer p { color: var(--danger); font-weight: 800; font-size: 16px; line-height: 1.8;}
+
+        /* ===== فوتر ===== */
+        footer { background: white; border-top: 1px solid var(--border); padding: 100px 40px 40px; }
+        .footer-inner { max-width: 1400px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 50px; margin-bottom: 50px; }
+        .footer-col h4 { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 24px; }
+        .footer-col p { font-size: 15px; color: var(--text-muted); line-height: 2; }
+        .footer-col a { display: block; color: var(--text-muted); text-decoration: none; font-size: 15px; padding: 8px 0; font-weight: 500;}
+        .footer-addresses { background: var(--bg); border-radius: var(--radius-md); padding: 30px; margin-bottom: 50px; border: 1px solid var(--border); }
+        .footer-addresses h4 { font-size: 16px; color: var(--text); margin-bottom: 20px; font-weight: 900; }
+        .footer-addr { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .footer-addr:last-child { border: none; padding-bottom: 0; }
+        .footer-addr .addr-label { color: var(--text-muted); font-weight: 600;}
+        .footer-addr .addr-value { font-family: monospace; color: var(--primary-dark); font-size: 14px; font-weight: 700; background: white; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); word-break: break-all;}
+        .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid var(--border); font-size: 14px; color: var(--text-muted); }
+        .footer-bottom-links { display: flex; gap: 30px; }
+        .footer-bottom-links a { color: var(--text-muted); text-decoration: none; font-weight: 700;}
+
+        /* انیمیشن اسکرول */
+        .animate-on-scroll { opacity: 0; transform: translate3d(0, 30px, 0); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform; }
+        .animate-on-scroll.visible { opacity: 1; transform: translate3d(0, 0, 0); }
+        .delay-1 { transition-delay: 0.1s; }
+        .delay-2 { transition-delay: 0.2s; }
+        .delay-3 { transition-delay: 0.3s; }
+        .delay-4 { transition-delay: 0.4s; }
+
+        @media (max-width: 1024px) {
+            section { padding: 80px 30px; }
+            header { padding: 0 30px; }
+            .live-stats { padding: 0 30px; margin-top: -50px;}
+            .how-it-works { grid-template-columns: repeat(3, 1fr); }
+            .portfolio-grid, .team-grid, .documents-grid, .risk-categories { grid-template-columns: repeat(2, 1fr); }
+            .allocation-grid { grid-template-columns: 1fr; gap: 40px; }
+            .live-stats-inner { grid-template-columns: repeat(2, 1fr); gap: 30px; padding: 30px;}
+            .live-stat:nth-child(2)::after { display: none; }
+            .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+            .glass-card { display: none; } 
+        }
+
+        @media (max-width: 768px) {
+            section { padding: 50px 15px; }
+            header { padding: 0 15px; }
+            footer { padding: 40px 15px 20px; }
+            
+            .mobile-toggle { display: block; }
+            nav {
+                position: absolute; top: 75px; left: 0; width: 100%;
+                background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(20px);
+                flex-direction: column; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                transform: translate3d(0, -150%, 0); opacity: 0; transition: all 0.4s; border-bottom: 1px solid var(--border);
+            }
+            nav.active { transform: translate3d(0, 0, 0); opacity: 1; }
+            nav a { width: 100%; text-align: center; padding: 12px; border-bottom: 1px solid var(--border); font-size: 15px;}
+            nav a:not(.nav-cta)::after { display: none; }
+            .nav-cta { margin: 15px 0 0 0; width: 100%; text-align: center;}
+
+            .hero { padding: 60px 15px 100px; }
+            .hero-badge { font-size: 12px; padding: 6px 16px; margin-bottom: 20px; }
+            .hero h1 { font-size: 38px; margin-bottom: 16px; letter-spacing: -1px; line-height: 1.3;} 
+            .hero p { font-size: 15px; margin-bottom: 30px; line-height: 1.7;} 
+            
+            .hero-buttons { flex-direction: column; width: 100%; gap: 12px; }
+            .btn-primary, .btn-secondary, .app-badge { width: 100%; justify-content: center; padding: 16px 20px; font-size: 15px;}
+
+            .live-stats { padding: 0 15px; margin-top: -60px; }
+            .live-stats-inner { grid-template-columns: 1fr; gap: 20px; padding: 25px 20px;}
+            .live-stat::after { display: none; } 
+            .live-stat { padding-bottom: 20px; border-bottom: 1px dashed var(--border); }
+            .live-stat:last-child { border-bottom: none; padding-bottom: 0; }
+            .live-stat .value { font-size: 32px; } 
+            .live-stat .label { font-size: 13px; }
+
+            .section-header { margin-bottom: 40px; }
+            .section-header h2 { font-size: 26px; margin-bottom: 12px;}
+            .section-header p { font-size: 14px; }
+            
+            .how-it-works, .about-grid, .portfolio-grid, .team-grid, .documents-grid, 
+            .wallet-addresses, .value-model-grid, .governance-grid, .risk-categories, 
+            .footer-grid, .about-features { grid-template-columns: 1fr; gap: 16px; }
+
+            .card { padding: 20px; }
+            .step-card { padding: 25px 15px; }
+            
+            .value-text-box { padding: 25px 20px; }
+            .value-text-box::after, .value-text-box::before { display: none; } /* مخ��ی کردن خط وصل کننده در موبایل */
+            
+            .value-point { flex-direction: column; text-align: center; gap: 10px; padding: 15px 0;}
+            
+            /* تنظیم خطوط عمودی تایم لاین در موبایل */
+            .value-point:not(:last-child)::before { right: 50%; margin-right: -2px; top: 60px; bottom: -15px; }
+            .value-point:not(:last-child)::after { right: 50%; margin-right: -7px; bottom: -25px; }
+
+            .value-text-box h3 { font-size: 24px; }
+            .value-text-box p { font-size: 14px; }
+            .value-dot { width: 48px; height: 48px; font-size: 20px;}
+            .value-info .value-amount { font-size: 22px; }
+            .value-example { padding: 25px; }
+            
+            .dashboard-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .dashboard-header h3 { font-size: 20px; }
+            .chain-badge { align-self: stretch; justify-content: center; font-size: 12px;}
+            .wallet-card .address { font-size: 11px; padding: 10px;} 
+
+            .portfolio-content { padding: 20px; }
+            .portfolio-content h3 { font-size: 18px; }
+            .portfolio-meta { grid-template-columns: 1fr 1fr; gap: 10px; } 
+            .meta-item .meta-label { font-size: 11px; }
+            .meta-item .meta-value { font-size: 13px; }
+
+            .app-section { padding: 40px 15px; }
+            .app-section h3 { font-size: 22px; }
+            .app-section .text-muted { font-size: 14px; margin-bottom: 25px;}
+
+            .risk-section { padding: 30px 15px; }
+            .risk-section h3 { font-size: 20px; flex-direction: column; text-align: center; }
+            .risk-category h4 { font-size: 15px; }
+            .risk-category li { font-size: 13px; }
+
+            .footer-col h4 { font-size: 16px; margin-bottom: 15px;}
+            .footer-col p, .footer-col a { font-size: 13px; }
+            .footer-addr { flex-direction: column; align-items: flex-start; gap: 6px;}
+            .footer-addr .addr-value { font-size: 11px; padding: 6px; width: 100%; text-align: left; overflow-wrap: break-word;}
+            .footer-bottom { flex-direction: column; gap: 15px; text-align: center; font-size: 12px;}
+            .footer-bottom-links { flex-wrap: wrap; justify-content: center; gap: 15px;}
+        }
+    </style>
+</head>
+<body>
+
+    <!-- هدر -->
+    <header id="header">
+        <div class="header-inner">
+            <a href="#" class="logo">
+                <div class="logo-icon"><i class="fa-solid fa-cube"></i></div>
+                <div class="logo-text">فاندریز<span>NFT</span></div>
+            </a>
+            <button class="mobile-toggle" id="mobile-toggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <nav id="nav-menu">
+                <a href="#home" class="nav-link active">خانه</a>
+                <a href="#about" class="nav-link">درباره ما</a>
+                <a href="#transparency" class="nav-link">شفافیت</a>
+                <a href="#portfolio" class="nav-link">پروژه‌ها</a>
+                <a href="#nft-app" class="nav-link">دانلود</a>
+                <a href="#governance" class="nav-link">حاکمیت</a>
+                <a href="#documents" class="nav-link">اسناد</a>
+                <a href="#nft-app" class="nav-cta"><i class="fa-solid fa-mobile-screen"></i> دانلود اپلیکیشن DNM</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- هیرو ارتقا یافته (بهینه‌شده برای سرعت) -->
+    <section class="hero" id="home">
+        <!-- گوی‌های متحرک نوری (Aurora) -->
+        <div class="hero-orb orb-1"></div>
+        <div class="hero-orb orb-2"></div>
+        <div class="hero-orb orb-3"></div>
+
+        <!-- کارت‌های شیشه‌ای ۳ بعدی (NFT Mockups) -->
+        <div class="glass-card gc-1">
+            <!-- آیکون پالیگان جایگزین اتریوم شد -->
+            <i class="fa-brands fa-ethereum" style="font-size: 50px; color: rgba(255,255,255,0.8); filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));"></i>
+        </div>
+        <div class="glass-card gc-2">
+            <i class="fa-solid fa-gem" style="font-size: 40px; color: rgba(255,255,255,0.7); text-shadow: 0 5px 15px rgba(0,0,0,0.1);"></i>
+        </div>
+        <div class="glass-card gc-3">
+            <i class="fa-solid fa-cube" style="font-size: 24px; color: rgba(255,255,255,0.6);"></i>
+        </div>
+
+        <div class="hero-content">
+            <div class="hero-badge reveal-element">
+                <i class="fa-brands fa-ethereum" style="color: var(--primary); font-size: 18px;"></i> مبتنی بر بلاکچین پالیگان | DAI
+            </div>
+            
+            <h1 class="reveal-element">
+                اکوسیستم غیرمتمرکز <br>
+                <span class="highlight">مبتنی بر NFT</span>
+            </h1>
+            
+            <p class="reveal-element">
+                با خرید NFT از طریق اپلیکیشن DNM در این اکوسیستم مشارکت کنید. دارایی شما در پروژه‌های واقعی دنیای مادی سرمایه‌گذاری شده و ارزش NFT شما رشد می‌کند. هر زمان خواستید NFT خود را بفروشید و سود خود را دریافت کنید.
+            </p>
+            
+            <div class="hero-buttons reveal-element">
+                <a href="#nft-app" class="btn-primary">
+                    <i class="fa-solid fa-mobile-screen"></i> دانلود اپلیکیشن DNM
+                </a>
+                <a href="#transparency" class="btn-secondary">
+                    <i class="fa-solid fa-chart-pie"></i> داشبورد شفافیت
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- آمار لایو -->
+    <div class="live-stats">
+        <div class="live-stats-inner animate-on-scroll">
+            <div class="live-stat">
+                <div class="live-dot"><i class="fa-solid fa-link"></i> داده زنده از بلاکچین</div>
+                <span class="value"><span class="counter-num" data-target="125000">0</span> <span class="unit">DAI</span></span>
+                <div class="label">ارزش کل قفل شده (TVL)</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-dot"><i class="fa-solid fa-link"></i> داده زنده از بلاکچین</div>
+                <span class="value counter-num" data-target="420">0</span>
+                <div class="label">NFT صادر شده</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-dot"><i class="fa-solid fa-link"></i> داده زنده از بلاکچین</div>
+                <span class="value counter-num" data-target="350">0</span>
+                <div class="label">مشارکت‌کننده</div>
+            </div>
+            <div class="live-stat">
+                <div class="live-dot" style="color: var(--primary); background: rgba(108,92,231,0.1);"><i class="fa-solid fa-arrow-trend-up"></i> رشد ارزش</div>
+                <span class="value">+<span class="counter-num" data-target="650">0</span> <span class="unit">%</span></span>
+                <div class="label">رشد ارزش NFT از ابتدا</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نحوه کار -->
+    <section id="how">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-list-check"></i> فرآیند</div>
+            <h2>نحوه کار سیستم</h2>
+            <p>از خرید NFT تا رشد ارزش و فروش، همه چیز شفاف و قابل ردیابی روی بلاکچین است</p>
+        </div>
+        <div class="how-it-works">
+            <div class="card step-card animate-on-scroll">
+                <div class="step-number">۱</div>
+                <div class="step-icon"><i class="fa-solid fa-mobile-screen-button"></i></div>
+                <h3>دانلود اپلیکیشن DNM</h3>
+                <p>اپلیکیشن اختصاصی DNM را دانلود و نصب کنید</p>
+            </div>
+            <div class="card step-card animate-on-scroll delay-1">
+                <div class="step-number">۲</div>
+                <div class="step-icon"><i class="fa-solid fa-image"></i></div>
+                <h3>خرید NFT با DAI</h3>
+                <p>NFT فاندریز را با DAI از طریق اپلیکیشن خریداری کنید</p>
+            </div>
+            <div class="card step-card animate-on-scroll delay-2">
+                <div class="step-number">۳</div>
+                <div class="step-icon"><i class="fa-solid fa-building-columns"></i></div>
+                <h3>تزریق به پروژه‌ها</h3>
+                <p>تیم متخصص، دارایی جمع‌آوری‌شده را در پروژه‌های واقعی هدایت می‌کند</p>
+            </div>
+            <div class="card step-card animate-on-scroll delay-3">
+                <div class="step-number">۴</div>
+                <div class="step-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <h3>رشد ارزش NFT</h3>
+                <p>با موفقیت پروژه‌ها،ارزش پشتوانه NFT شما افزایش می‌یابد</p>
+            </div>
+            <div class="card step-card animate-on-scroll delay-4">
+                <div class="step-number">۵</div>
+                <div class="step-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                <h3>فروش و برداشت</h3>
+                <p>هر زمان خواستید NFT را بفروشید و ارزش آن را دریافت کنید</p>
+            </div>
+        </div>
+
+        <div class="value-model-grid">
+            <div class="value-text-box animate-on-scroll">
+                <h3><i class="fa-regular fa-gem" style="color: var(--primary);"></i> سود شما = رشد ارزش NFT</h3>
+                <p>
+                    در این پروتکل ما سود نقدی ماهیانه توزیع نمی‌کنیم. در عوض، با موفقیت پروژه‌های فیزیکی متصل به پلتفرم، ارزش پشتوانه افزایش می‌یابد و به تبع آن ارزش NFT شما رشد می‌کند.
+                </p>
+                <p>
+                    شما می‌توانید هر زمان که خواستید NFT خود را در بازار ثانویه بفروشید و معادل دلاری آن را به صورت DAI دریافت کنید.
+                </p>
+                <p style="color: var(--danger); font-size: 13px; font-weight: 700; margin-top: 15px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-exclamation"></i> توجه: ارزش NFT به پروژه‌های دنیای واقعی متصل است و می‌تواند کاهش یا افزایش یابد.
+                </p>
+            </div>
+            
+            <div class="value-example animate-on-scroll delay-2">
+                <h4 style="margin-bottom: 30px; font-size: 20px; font-weight: 900; text-align: center; color: var(--text);"><i class="fa-solid fa-chart-bar" style="color: var(--primary);"></i> مثال رشد ارزش دارایی</h4>
+                <div class="value-timeline">
+                    <div class="value-point">
+                        <div class="value-dot buy"><i class="fa-solid fa-palette"></i></div>
+                        <div class="value-info">
+                            <div class="value-label">خرید NFT</div>
+                            <div class="value-amount original">100 DAI</div>
+                        </div>
+                    </div>
+                    <div class="value-point">
+                        <div class="value-dot grow"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                        <div class="value-info">
+                            <div class="value-label">رشد ارزش (بعد از مدتی)</div>
+                            <div class="value-amount grown">750 DAI</div>
+                        </div>
+                    </div>
+                    <div class="value-point" style="border: none;">
+                        <div class="value-dot sell"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="value-info">
+                            <div class="value-label">فروش NFT و برداشت</div>
+                            <div class="value-amount profit">750 DAI</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- درباره ما -->
+    <section id="about">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-network-wired"></i> درباره ما</div>
+            <h2>ساختار غیرمتمرکز و تیم</h2>
+            <p>پلتفرمی شفاف بر بستر بلاکچین با اتصال به دارایی‌های دنیای واقعی (RWA)</p>
+        </div>
+
+        <div class="about-grid">
+            <div class="about-text animate-on-scroll">
+                <h3>اکوسیستم سرمایه‌گذاری غیرمتمرکز</h3>
+                <p>
+                    ما یک پلتفرم مبتنی بر بلاکچین پالیگان هستیم. با فروش NFT در اپلیکیشن DNM، دارایی دیجیتال جمع‌آوری شده و در پروژه‌های واقعی (RWA) نظیر استارتاپ‌ها، املاک و گردشگری به کار گرفته می‌شود.
+                </p>
+                <div class="about-features">
+                    <div class="about-feature">
+                        <div class="icon"><i class="fa-solid fa-link"></i></div>
+                        <h4 style="font-size: 15px; font-weight: 800;">آن‌چین شفاف</h4>
+                    </div>
+                    <div class="about-feature">
+                        <div class="icon"><i class="fa-solid fa-lock"></i></div>
+                        <h4 style="font-size: 15px; font-weight: 800;">Multi-sig ایمن</h4>
+                    </div>
+                    <div class="about-feature">
+                        <div class="icon"><i class="fa-brands fa-ethereum"></i></div>
+                        <h4 style="font-size: 15px; font-weight: 800;">شبکه پالیگان</h4>
+                    </div>
+                    <div class="about-feature">
+                        <div class="icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <h4 style="font-size: 15px; font-weight: 800;">اپلیکیشن DNM</h4>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card legal-info animate-on-scroll delay-2">
+                <h3><i class="fa-solid fa-file-contract" style="color: var(--primary);"></i> اطلاعات حقوقی پروژه‌ها</h3>
+                <p>
+                    پلتفرم ما یک ساختار کاملاً غیرمتمرکز (DeFi) است و به صورت قرارداد هوشمند روی بلاکچین فعالیت می‌کند.
+                </p>
+                <p>
+                    اسناد حقوقی، ثبتی و رسمی صرفاً متعلق به <b>دارایی‌های دنیای واقعی (RWA)</b> است که پلتفرم در آن‌ها مشارکت کرده است. تمامی این اسناد شامل سند زمین‌ها، قرارداد استارتاپ‌ها و... در بخش اسناد برای هولدرهای NFT قابل بررسی و رهگیری است.
+                </p>
+                <div style="margin-top: 25px; padding-top: 20px; border-top: 1px dashed var(--border);">
+                    <div class="legal-row"><span class="label">بستر اجرای پروتکل:</span><span class="value">بلاکچین Polygon</span></div>
+                    <div class="legal-row"><span class="label">آدیت قرارداد هوشمند:</span><span class="value" style="color: var(--success);"><i class="fa-solid fa-check-circle"></i> انجام شده</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- تیم -->
+    <section id="team">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-users"></i> تیم</div>
+            <h2>تیم اصلی پروژه</h2>
+        </div>
+
+        <div class="team-grid">
+            <div class="card team-card animate-on-scroll">
+                <div class="team-avatar">م.ر</div>
+                <h4>مرتضی نصرالهی</h4>
+                <div class="role">مدیرعامل و بنیانگذار</div>
+                <div class="team-social">
+                    <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="#"><i class="fa-brands fa-telegram"></i></a>
+                </div>
+            </div>
+            <div class="card team-card animate-on-scroll delay-1">
+                <div class="team-avatar">ع.ک</div>
+                <h4>محمدرضا پورحکیمی</h4>
+                <div class="role">مدیر مالی (CFO)</div>
+                <div class="team-social">
+                    <a href="#"><i class="fa-brands fa-telegram"></i></a>
+                </div>
+            </div>
+            <div class="card team-card animate-on-scroll delay-2">
+                <div class="team-avatar">س.م</div>
+                <h4>محمود نصری</h4>
+                <div class="role">مدیر فنی (CTO)</div>
+                <div class="team-social">
+                    <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="#"><i class="fa-brands fa-telegram"></i></a>
+                </div>
+            </div>
+            <div class="card team-card animate-on-scroll delay-3">
+                <div class="team-avatar">ر.ا</div>
+                <h4>حامد جنیدی</h4>
+                <div class="role">مشاور حقوقی</div>
+                <div class="team-social">
+                    <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- داشبورد شفافیت -->
+    <section id="transparency">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-chart-column"></i> شفافیت</div>
+            <h2>داشبورد شفافیت آن‌چین</h2>
+            <p>تمام اطلاعات مالی به صورت لحظه‌ای از شبکه پالیگان خوانده می‌شود</p>
+        </div>
+
+        <div class="card transparency-dashboard animate-on-scroll">
+            <div class="dashboard-header">
+                <h3><i class="fa-solid fa-satellite-dish" style="color: var(--danger);"></i> داده‌های زنده</h3>
+                <div class="chain-badge"><i class="fa-brands fa-ethereum"></i> Polygon Mainnet</div>
+            </div>
+
+            <div class="wallet-addresses">
+                <div class="wallet-card">
+                    <div class="label">آدرس ولت پلتفرم</div>
+                    <div class="address">0x1234...5678abcd...ef90</div>
+                </div>
+                <div class="wallet-card">
+                    <div class="label">قرارداد هوشمند NFT</div>
+                    <div class="address">0xabcd...1234efgh...5678</div>
+                </div>
+            </div>
+
+            <div class="allocation-grid">
+                <div>
+                    <h4>تخصیص دارایی</h4>
+                    <div class="bar-item">
+                        <div class="bar-header"><span class="bar-label">استارتاپ‌ها</span><span class="bar-value">40%</span></div>
+                        <div class="bar-bg"><div class="bar-fill purple" data-width="40"></div></div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-header"><span class="bar-label">املاک و مستغلات</span><span class="bar-value">25%</span></div>
+                        <div class="bar-bg"><div class="bar-fill teal" data-width="25"></div></div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-header"><span class="bar-label">گردشگری</span><span class="bar-value">15%</span></div>
+                        <div class="bar-bg"><div class="bar-fill pink" data-width="15"></div></div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4>رشد ارزش پشتوانه</h4>
+                    <div class="bar-item">
+                        <div class="bar-header"><span class="bar-label">ارزش کل دارایی‌ها</span><span class="bar-value" style="color: var(--success)">812,500 DAI</span></div>
+                        <div class="bar-bg"><div class="bar-fill green" data-width="81"></div></div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-header"><span class="bar-label">سرمایه اولیه</span><span class="bar-value">125,000 DAI</span></div>
+                        <div class="bar-bg"><div class="bar-fill purple" data-width="12"></div></div>
+                    </div>
+                    <div class="bar-item" style="margin-top: 20px;">
+                        <div class="bar-header">
+                            <span class="bar-label"><i class="fa-solid fa-clipboard-check" style="color: var(--secondary);"></i> آخرین گزارش حسابرسی فیزیکی</span>
+                            <span class="bar-value" style="color: var(--secondary)">بهمن ماه ۱۴۰4 ✓</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- پورتفولیو پروژه‌ها -->
+    <section id="portfolio">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-briefcase"></i> پروژه‌ها (RWA)</div>
+            <h2>پروژه‌های پشتیبان ارزش NFT</h2>
+        </div>
+
+        <div class="portfolio-grid">
+            <div class="card animate-on-scroll" style="padding: 0;">
+                <div class="portfolio-image" style="background: linear-gradient(135deg, #dcd6ff, #f0eeff);">
+                    <i class="fa-solid fa-rocket" style="color: #6c5ce7;"></i>
+                    <span class="portfolio-status status-active">فعال</span>
+                </div>
+                <div class="portfolio-content">
+                    <div style="font-size: 11px; font-weight: 800; color: var(--secondary); letter-spacing: 1px;">استارتاپ فین‌تک</div>
+                    <h3>استارتاپ آلین</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">پلتفرم نوین خدمات مالی و پرداخت</p>
+                    <div class="portfolio-meta">
+                        <div class="meta-item"><div class="meta-label">تزریق شده</div><div class="meta-value">50k DAI</div></div>
+                        <div class="meta-item"><div class="meta-label">ارزش فعلی سهم</div><div class="meta-value" style="color: var(--success)">62k DAI</div></div>
+                    </div>
+                    <div style="margin-top: 15px;"><a href="#" class="doc-badge"><i class="fa-solid fa-file-contract"></i> قرارداد استارتاپ</a></div>
+                </div>
+            </div>
+
+            <div class="card animate-on-scroll delay-1" style="padding: 0;">
+                <div class="portfolio-image" style="background: linear-gradient(135deg, #c8f7f7, #e8fffe);">
+                    <i class="fa-solid fa-building" style="color: #00cec9;"></i>
+                    <span class="portfolio-status status-active">فعال</span>
+                </div>
+                <div class="portfolio-content">
+                    <div style="font-size: 11px; font-weight: 800; color: var(--secondary); letter-spacing: 1px;">املاک / مستغلات</div>
+                    <h3>انبار و تولید حاجی‌آباد اراک</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">زمین اختصاصی جهت طرح توسعه صنعتی</p>
+                    <div class="portfolio-meta">
+                        <div class="meta-item"><div class="meta-label">ارزش خرید</div><div class="meta-value">100k DAI</div></div>
+                        <div class="meta-item"><div class="meta-label">ارزش فعلی</div><div class="meta-value" style="color: var(--success)">120k DAI</div></div>
+                    </div>
+                    <div style="margin-top: 15px;"><a href="#" class="doc-badge"><i class="fa-solid fa-file-signature"></i> سند ملک</a></div>
+                </div>
+            </div>
+
+            <div class="card animate-on-scroll delay-2" style="padding: 0;">
+                <div class="portfolio-image" style="background: linear-gradient(135deg, #ffd6e7, #fff0f5);">
+                    <i class="fa-solid fa-tree-city" style="color: #fd79a8;"></i>
+                    <span class="portfolio-status status-active">فعال</span>
+                </div>
+                <div class="portfolio-content">
+                    <div style="font-size: 11px; font-weight: 800; color: var(--secondary); letter-spacing: 1px;">گردشگری</div>
+                    <h3>طرح گردشگری قزوین</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">زمین اختصاصی توسعه مجتمع توریستی</p>
+                    <div class="portfolio-meta">
+                        <div class="meta-item"><div class="meta-label">ارزش خرید</div><div class="meta-value">30k DAI</div></div>
+                        <div class="meta-item"><div class="meta-label">رشد برآورد شده</div><div class="meta-value" style="color: var(--success)">+25%</div></div>
+                    </div>
+                    <div style="margin-top: 15px;"><a href="#" class="doc-badge"><i class="fa-solid fa-file-signature"></i> سند زمین</a></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- بخش اپلیکیشن DNM -->
+    <section id="nft-app">
+        <div class="app-section animate-on-scroll">
+            <i class="fa-solid fa-mobile-screen-button" style="font-size: 60px; margin-bottom: 24px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));"></i>
+            <h3>خرید و فروش از اپلیکیشن DNM</h3>
+            <p class="text-muted" style="max-width: 650px; margin: 0 auto 30px; line-height: 1.9; color: rgba(255,255,255,0.9) !important;">
+                تمام عملیات از طریق اپلیکیشن اختصاصی انجام می‌شود. اپلیکیشن را دانلود کنید و وارد دنیای فاندریزینگ شوید.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="#" class="app-badge"><i class="fa-brands fa-android" style="font-size: 24px;"></i> Android</a>
+                <a href="#" class="app-badge"><i class="fa-brands fa-apple" style="font-size: 24px;"></i> iOS</a>
+                <a href="#" class="app-badge" style="background: white; color: var(--primary);"><i class="fa-solid fa-globe"></i> نسخه وب</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- حاکمیت -->
+    <section id="governance">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-check-to-slot"></i> حاکمیت</div>
+            <h2>حاکمیت غیرمتمرکز (DAO)</h2>
+        </div>
+
+        <div class="governance-grid">
+            <div class="card governance-card animate-on-scroll">
+                <h3><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> حقوق دارندگان NFT</h3>
+                <ul class="rights-list">
+                    <li><div class="right-icon"><i class="fa-solid fa-arrow-trend-up"></i></div> بهره‌مندی از رشد ارزش دارایی‌های پایه</li>
+                    <li><div class="right-icon"><i class="fa-solid fa-sack-dollar"></i></div> حق فروش و نقد کردن NFT در هر زمان</li>
+                    <li><div class="right-icon"><i class="fa-solid fa-check-to-slot"></i></div> حق رای در تصمیمات مهم پروژه‌ها</li>
+                    <li><div class="right-icon"><i class="fa-solid fa-chart-pie"></i></div> دسترسی شفاف به گزارش‌های مالی</li>
+                </ul>
+            </div>
+
+            <div class="card governance-card animate-on-scroll delay-2">
+                <h3><i class="fa-solid fa-lock" style="color: var(--primary);"></i> ساختار چندامضایی (Multi-sig)</h3>
+                <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">خروج دارایی از پروتکل جهت تخصیص به پروژه‌ها فقط با تایید ۳ از ۵ امضاکننده معتبر در بلاکچین انجام می‌شود.</p>
+                <div>
+                    <div class="signer"><div class="signer-icon"><i class="fa-solid fa-user"></i></div><div class="signer-info"><div class="signer-name">مدیرعامل پروژه</div><div class="signer-role">امضاکننده ۱</div></div></div>
+                    <div class="signer"><div class="signer-icon"><i class="fa-solid fa-briefcase"></i></div><div class="signer-info"><div class="signer-name">مدیر مالی</div><div class="signer-role">امضاکننده ۲</div></div></div>
+                    <div class="signer"><div class="signer-icon"><i class="fa-solid fa-scale-balanced"></i></div><div class="signer-info"><div class="signer-name">مشاور حقوقی</div><div class="signer-role">امضاکننده ۳</div></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- اسناد -->
+    <section id="documents">
+        <div class="section-header animate-on-scroll">
+            <div class="section-tag"><i class="fa-solid fa-file-lines"></i> اسناد</div>
+            <h2>مستندات پلتفرم و پروژه‌ها</h2>
+        </div>
+
+        <div class="documents-grid">
+            <div class="card doc-card animate-on-scroll"><div class="doc-icon"><i class="fa-regular fa-file-lines"></i></div><h4>وایت‌پیپر پلتفرم</h4><p>سند کامل نحوه عملکرد اکوسیستم روی پالیگان</p><a href="#" class="doc-download"><i class="fa-solid fa-download"></i> دانلود PDF</a></div>
+            <div class="card doc-card animate-on-scroll"><div class="doc-icon"><i class="fa-solid fa-file-signature"></i></div><h4>اسناد ملکی (RWA)</h4><p>اسناد ثبتی مربوط به املاک حاجی‌آباد و قزوین</p><a href="#" class="doc-download"><i class="fa-solid fa-download"></i> مشاهده اسناد</a></div>
+            <div class="card doc-card animate-on-scroll"><div class="doc-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div><h4>گزارش آدیت هوشمند</h4><p>بررسی امنیتی قرارداد توکن‌های NFT</p><a href="#" class="doc-download"><i class="fa-solid fa-download"></i> دانلود PDF</a></div>
+        </div>
+    </section>
+
+    <!-- بیانیه ریسک -->
+    <section id="risk">
+        <div class="risk-section animate-on-scroll">
+            <h3><i class="fa-solid fa-triangle-exclamation"></i> بیانیه افشای ریسک</h3>
+            <div class="risk-categories">
+                <div class="card risk-category"><h4>ریسک‌های بلاکچین</h4><ul><li>آسیب‌پذیری قراردادهای هوشمند</li><li>نوسان جزئی استیبل‌کوین‌ها</li><li>تراکم و مشکلات شبکه پالیگان</li></ul></div>
+                <div class="card risk-category"><h4>ریسک‌های پروژه‌ها (RWA)</h4><ul><li>شکست یا تاثیر استارتاپ آلین</li><li>رکود بازار املاک و مستغلات</li><li>مشکلات مجوز در طرح‌های گردشگری</li></ul></div>
+                <div class="card risk-category"><h4>ریسک‌های بازار</h4><ul><li>نقدشوندگی در بازار ثانویه</li><li>نوسانات ارزش واقعی دارایی‌ها</li><li>تغییرات قوانین و رگولاتوری</li></ul></div>
+            </div>
+            <div class="risk-disclaimer">
+                <p>ارزش NFT شما وابستگی مستقیم به موفقیت پروژه‌های فیزیکی متصل به آن دارد و می‌تواند دچار کاهش ارزش شود. مشارکت در این اکوسیستم به معنای پذیرش تمامی ریسک‌های سرمایه‌گذاری است.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- فوتر -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-addresses">
+                <h4><i class="fa-brands fa-ethereum"></i> آدرس‌های شبکه پالیگان</h4>
+                <div class="footer-addr"><span class="addr-label">ولت چندامضایی (پلتفرم):</span><span class="addr-value">0x1234...cdef</span></div>
+                <div class="footer-addr" style="border: none; padding-bottom: 0;"><span class="addr-label">قرارداد توکن NFT:</span><span class="addr-value">0xabcd...5678</span></div>
+            </div>
+
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>درباره اکوسیستم</h4>
+                    <p>یک پلتفرم غیرمتمرکز برای توکنیزه کردن پروژه‌های دنیای واقعی (RWA) از طریق NFT. خرید و فروش با اپلیکیشن DNM.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>لینک‌های سریع</h4>
+                    <a href="#home">صفحه اصلی</a>
+                    <a href="#about">درباره ما</a>
+                    <a href="#transparency">داشبورد شفافیت</a>
+                </div>
+                <div class="footer-col">
+                    <h4>اسناد حقوقی</h4>
+                    <a href="#">وایت‌پیپر</a>
+                    <a href="#risk">بیانیه ریسک</a>
+                    <a href="#">اسناد املاک و استارتاپ</a>
+                </div>
+                <div class="footer-col">
+                    <h4>فنی و امنیت</h4>
+                    <a href="#">گزارش حسابرسی (Audit)</a>
+                    <a href="#">کد منبع (GitHub)</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <span>© ۱۴۰3 - تمامی حقوق محفوظ</span>
+                <div class="footer-bottom-links">
+                    <a href="#">شرایط استفاده</a>
+                    <a href="#">حریم خصوصی</a>
+                    <a href="#risk">بیانیه ریسک</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const navMenu = document.getElementById('nav-menu');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        mobileToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            const icon = mobileToggle.querySelector('i');
+            if(navMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            } else {
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                mobileToggle.querySelector('i').classList.replace('fa-xmark', 'fa-bars');
+            });
+        });
+
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }, { passive: true }); // passive true برای سرعت اسکرول
+
+        const animateCounters = (element) => {
+            const counters = element.querySelectorAll('.counter-num');
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const updateCount = () => {
+                    const count = +counter.innerText.replace(/,/g, '');
+                    const inc = target / 150;
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc).toLocaleString();
+                        setTimeout(updateCount, 15);
+                    } else {
+                        counter.innerText = target.toLocaleString();
+                    }
+                };
+                updateCount();
+            });
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    
+                    const bars = entry.target.querySelectorAll('.bar-fill[data-width]');
+                    bars.forEach(bar => { setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 200); });
+
+                    if(entry.target.querySelector('.counter-num')) { animateCounters(entry.target); }
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
